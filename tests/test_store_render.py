@@ -1,3 +1,4 @@
+import sys
 from datetime import date
 
 from openwisp_voucher import render, store
@@ -16,7 +17,8 @@ def test_settings_roundtrip_and_unknown_keys(config_home):
 def test_files_are_private(config_home):
     store.save_history([store.HistoryEntry("u", "p", "2026-10-28", "2026-10-26T10:00:00", "o")])
     path = config_home / "openwisp-voucher" / "accessi.json"
-    assert path.stat().st_mode & 0o077 == 0
+    if sys.platform != "win32":  # su Windows vale l'ACL della cartella utente
+        assert path.stat().st_mode & 0o077 == 0
     assert store.load_history()[0].username == "u"
 
 
