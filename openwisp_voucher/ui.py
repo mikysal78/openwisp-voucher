@@ -38,7 +38,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from . import __version__, render, store
+from . import __version__, i18n, render, store
 from .api import BATCH_SYNC_MAX, ApiError, OpenWispApi, normalize_server
 from .i18n import tr
 from .store import HistoryEntry, Settings
@@ -616,8 +616,12 @@ class SettingsTab(QWidget):
         self.login_button.clicked.connect(self.w.login)
         self.logout_button = QPushButton(tr("Esci"))
         self.logout_button.clicked.connect(self.w.logout)
+        # rilegge organizzazioni e gruppi, ad esempio dopo averne creato uno nell'admin
+        self.refresh_button = QPushButton(tr("Aggiorna dal server"))
+        self.refresh_button.clicked.connect(self.w.load_account)
         login_row.addWidget(self.login_button)
         login_row.addWidget(self.logout_button)
+        login_row.addWidget(self.refresh_button)
         login_row.addStretch()
         self.org = QComboBox()
         self.org.currentIndexChanged.connect(self._org_changed)
@@ -717,7 +721,7 @@ class SettingsTab(QWidget):
         df.addRow(tr("Durata"), self.default_days)
         df.addRow(tr("Prefisso delle serie"), self.series_prefix)
         df.addRow(tr("Lunghezza password"), self.password_length)
-        df.addRow(tr("Lingua (al riavvio)"), self.language)
+        df.addRow(tr("Lingua"), self.language)
         col.addWidget(defaults)
         col.addStretch()
 
@@ -732,8 +736,9 @@ class SettingsTab(QWidget):
         for widget in (self.venue_name, self.website, self.email, self.phone, self.ssid,
                        self.wifi_password, self.footer_note, self.qr_url, self.series_prefix):
             widget.textChanged.connect(self._changed)
-        for widget in (self.format, self.qr, self.language):
+        for widget in (self.format, self.qr):
             widget.currentIndexChanged.connect(self._changed)
+        self.language.currentIndexChanged.connect(self._language_changed)
         for widget in (self.label_w, self.label_h, self.default_days, self.password_length):
             widget.valueChanged.connect(self._changed)
         self._update_enabled()
@@ -744,6 +749,10 @@ class SettingsTab(QWidget):
         if not self._loading:
             self._update_enabled()
             self._timer.start()
+
+    def _language_changed(self, index):
+        if not self._loading:
+            self.w.change_language(self.language.itemData(index))
 
     def _update_enabled(self):
         is_label = self.format.currentData() == store.FORMAT_LABEL
@@ -817,6 +826,7 @@ class SettingsTab(QWidget):
                 role = tr(" (amministratore)") if user.get("is_superuser") else tr(" (operatore)")
             self.account.setText(f"{s.username}{role} — {self.w.api.server}")
         self.logout_button.setEnabled(self.w.api is not None)
+        self.refresh_button.setEnabled(self.w.api is not None)
 
     def set_organizations(self, orgs: list[dict], is_superuser: bool):
         """Il superuser sceglie; gli altri vedono solo le loro organizzazioni."""
@@ -864,6 +874,8 @@ class SettingsTab(QWidget):
 
 
 class MainWindow(QMainWindow):
+    current: "MainWindow | None" = None  # tiene viva la finestra ricostruita
+
     def __init__(self, icon: QIcon | None = None):
         super().__init__()
         self.setWindowTitle(tr("Accessi Wi-Fi") + " — openwisp-voucher " + __version__)
@@ -898,6 +910,22 @@ class MainWindow(QMainWindow):
     def settings_changed(self):
         self.new_tab.refresh_preview()
         self.settings_tab.refresh_preview()
+
+    def change_language(self, lang: str):
+        """Le etichette si leggono alla creazione: si ricostruisce la finestra."""
+        if self.settings_tab._timer.isActive():
+            self.settings_tab._timer.stop()
+            self.settings_tab.save()
+        self.settings.language = lang
+        store.save_settings(self.settings)
+        i18n.set_language(lang)
+        window = MainWindow(self.windowIcon())
+        window.setGeometry(self.geometry())
+        window.tabs.setCurrentIndex(self.tabs.currentIndex())
+        window.show()
+        MainWindow.current = window
+        self.close()
+        self.deleteLater()
 
     def update_status(self):
         s = self.settings

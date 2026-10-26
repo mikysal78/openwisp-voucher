@@ -68,3 +68,26 @@ def test_history_filters(qapp):
     assert len(tab.rows) == 3
     tab.search.setText("scad")
     assert [e.username for e in tab.rows] == ["scaduto"]
+
+
+def test_language_applies_without_restart(qapp):
+    from openwisp_voucher import i18n
+    from openwisp_voucher.ui import MainWindow
+
+    w = window(qapp)
+    w.tabs.setCurrentWidget(w.settings_tab)
+    try:
+        w.settings_tab.language.setCurrentIndex(w.settings_tab.language.findData("en"))
+        new = MainWindow.current
+        assert new is not w and store.load_settings().language == "en"
+        assert new.tabs.tabText(0) == "New access"
+        assert new.tabs.currentWidget() is new.settings_tab
+    finally:
+        i18n.set_language("it")
+        MainWindow.current = None
+
+
+def test_refresh_button_needs_login(qapp):
+    w = window(qapp)
+    w.settings_tab.show_account(None)
+    assert not w.settings_tab.refresh_button.isEnabled()
