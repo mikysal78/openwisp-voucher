@@ -66,7 +66,6 @@ EN = {
     "Aggiorna dal server": "Refresh from server",
     "Aggiorna stato": "Refresh status",
     "Appena creati": "Just created",
-    "Camera 12": "Room 12",
     "Cerca utente, ospite o nota": "Search username, guest or note",
     "Cognome": "Last name",
     "Collegamento alla rete Wi-Fi": "Join the Wi-Fi network",

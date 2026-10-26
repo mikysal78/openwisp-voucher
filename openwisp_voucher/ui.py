@@ -105,7 +105,6 @@ def sample_voucher(settings: Settings) -> Voucher:
         settings.series_prefix + "1" if settings.series_prefix else "ospite1",
         generate_password(settings.password_length),
         expiration_for_days(max(settings.default_days, 1)),
-        notes=tr("Camera 12"),
     )
 
 

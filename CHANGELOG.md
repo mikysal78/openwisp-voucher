@@ -5,6 +5,7 @@
 - "Refresh from server" button in Settings: reloads organizations and RADIUS
   groups (for example after creating a group in the admin) without restarting.
 - The language changes as soon as it is chosen, without restarting.
+- The sample ticket in Settings and the test print no longer show an example note.
 
 ## 0.1.0
 
