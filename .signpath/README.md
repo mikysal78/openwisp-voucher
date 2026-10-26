@@ -42,9 +42,10 @@ publishes the signed file. The release notes then say it is signed.
 
 ## 4. Code signing policy
 
-The SignPath Foundation asks the project to publish its code signing policy.
-After the approval, add this section to `README.md` (and its translation to
-`README.it.md`):
+The SignPath Foundation asks the project to publish its code signing policy:
+it is the "Code signing policy" section of `README.md` and `README.it.md`.
+After the approval, remove the sentence saying that the application is pending.
+For reference, the required content:
 
 ```markdown
 ## Code signing policy

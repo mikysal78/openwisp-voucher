@@ -133,6 +133,24 @@ PATH=$PWD/.venv/bin:$PATH packaging/build.sh   # eseguibile unico in dist/
    gli eseguibili per Windows e Linux, calcola `SHA256SUMS`, attesta la
    provenienza e pubblica la release con le note del CHANGELOG.
 
+## Code signing policy
+
+Firma del codice gratuita offerta da [SignPath.io](https://about.signpath.io/),
+certificato della [SignPath Foundation](https://signpath.org/). La domanda al
+programma della SignPath Foundation è stata inviata: finché non viene
+approvata, gli eseguibili per Windows non sono firmati.
+
+- Autori e revisori: [Michele Salerno](https://github.com/mikysal78)
+- Approvazione delle firme: [Michele Salerno](https://github.com/mikysal78)
+
+Si firmano solo gli eseguibili compilati dalle
+[GitHub Actions](.github/workflows/release.yml) di questo repository a partire
+da un tag di release, e ogni richiesta di firma si approva a mano.
+
+Privacy: il programma non trasmette informazioni ad altri sistemi in rete se
+non su richiesta esplicita di chi lo usa, lo installa o lo gestisce. Si collega
+solo al server OpenWISP indicato dall'utente.
+
 ## Collegati
 
 - [openwisp-android](https://github.com/mikysal78/openwisp-android): gestire

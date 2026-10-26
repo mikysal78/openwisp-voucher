@@ -136,7 +136,7 @@ jobs:
           fi
           cat >> notes.md <<NOTES
 
-          **Windows**: \`openwisp-voucher-$VERSION-windows.exe\` ($windows_note).
+          **Windows**: \`openwisp-voucher-$VERSION-windows.exe\` ($windows_note; [code signing policy](https://github.com/$GITHUB_REPOSITORY#code-signing-policy)).
           **Linux** (x86_64): extract \`openwisp-voucher-$VERSION-linux-x86_64.tar.gz\` and run \`./openwisp-voucher\`; on Debian/Ubuntu Qt also needs \`libxcb-cursor0\`.
           Checksums in \`SHA256SUMS\`, build provenance attested by GitHub
           (\`gh attestation verify <file> -R $GITHUB_REPOSITORY\`).

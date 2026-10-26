@@ -128,6 +128,24 @@ PATH=$PWD/.venv/bin:$PATH packaging/build.sh   # single executable in dist/
    and Linux executables, computes `SHA256SUMS`, attests the provenance and
    publishes the release with the CHANGELOG notes.
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/),
+certificate by [SignPath Foundation](https://signpath.org/). The application
+to the SignPath Foundation program has been submitted: until it is approved,
+the Windows executables are not signed.
+
+- Committers and reviewers: [Michele Salerno](https://github.com/mikysal78)
+- Approvers: [Michele Salerno](https://github.com/mikysal78)
+
+Only executables built by this repository's
+[GitHub Actions](.github/workflows/release.yml) from a release tag are signed,
+and each signing request is approved by hand.
+
+Privacy: this program will not transfer any information to other networked
+systems unless specifically requested by the user or the person installing or
+operating it. It connects only to the OpenWISP server that the user configures.
+
 ## Related
 
 - [openwisp-android](https://github.com/mikysal78/openwisp-android): manage
