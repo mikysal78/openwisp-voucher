@@ -50,7 +50,7 @@ jobs:
         run: |
           $info = (Get-Item dist/openwisp-voucher.exe).VersionInfo
           $info | Format-List ProductName, ProductVersion, FileVersion
-          $version = (Select-String -Path openwisp_voucher/__init__.py -Pattern '"(.+)"').Matches[0].Groups[1].Value
+          $version = (Select-String -Path openwisp_voucher/__init__.py -Pattern '__version__ = "(.+)"').Matches[0].Groups[1].Value
           if ($info.ProductName -ne 'openwisp-voucher' -or $info.ProductVersion -ne $version) {
             throw "Unexpected metadata: $($info.ProductName) $($info.ProductVersion)"
           }
