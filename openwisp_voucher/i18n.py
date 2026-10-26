@@ -180,4 +180,7 @@ EN = {
     "Il server non ha restituito il token": "The server did not return a token",
     "Il server non ha restituito le credenziali": "The server did not return the credentials",
     "Utente {username} non creato": "User {username} not created",
+    "Errore interno del server OpenWISP ({status}): controlla i log del server": "OpenWISP internal server error ({status}): check the server logs",
+    "L'email {email} è già usata da un altro utente": "The email {email} is already used by another user",
+    "OpenWISP non ha creato l'ospite ({status}): di solito l'email è già usata da un altro utente": "OpenWISP did not create the guest ({status}): usually the email is already used by another user",
 }

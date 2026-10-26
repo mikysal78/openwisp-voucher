@@ -98,6 +98,9 @@ class OpenWispApi:
                 message = response.reason or "errore"
             if response.status_code == 401:
                 message = tr("Accesso scaduto o non valido: rifai il login")
+            elif response.status_code >= 500:
+                message = tr("Errore interno del server OpenWISP ({status}): controlla i log del server").format(
+                    status=response.status_code)
             elif response.status_code == 403 and not message:
                 message = tr("Permesso negato")
             raise ApiError(message, response.status_code)
@@ -134,11 +137,19 @@ class OpenWispApi:
         return token
 
     def current_user(self, username: str) -> dict | None:
-        """Non c'è un endpoint "me": si cerca l'utente per nome."""
-        for user in self._all("users/user/", {"search": username}):
+        """Non c'è un endpoint "me": si cerca l'utente per nome.
+
+        users/user/ ignora "search" (openwisp-users 1.3): filtriamo noi.
+        """
+        for user in self._all("users/user/"):
             if user.get("username") == username:
                 return user
         return None
+
+    def email_in_use(self, email: str) -> bool:
+        """Solo tra gli utenti visibili: un operatore non vede le altre organizzazioni."""
+        email = email.strip().lower()
+        return any((u.get("email") or "").lower() == email for u in self._all("users/user/"))
 
     def organizations(self) -> list[dict]:
         """Il superuser le vede tutte, gli altri solo quelle che gestiscono."""
@@ -198,6 +209,9 @@ class OpenWispApi:
 
         Con "cleartext$" il server usa la nostra password e non manda email.
         """
+        # l'email deve essere unica: openwisp-radius 1.3 la rifiuta con un 500
+        if self.email_in_use(email):
+            raise ApiError(tr("L'email {email} è già usata da un altro utente").format(email=email))
         buffer = io.StringIO()
         csv.writer(buffer).writerow(
             [username, "cleartext$" + password, email, first_name, last_name]
@@ -212,7 +226,15 @@ class OpenWispApi:
         if group:
             data["group"] = group
         files = {"csvfile": ("utente.csv", buffer.getvalue().encode(), "text/csv")}
-        batch = self._request("POST", "radius/batch/", data=data, files=files)
+        try:
+            batch = self._request("POST", "radius/batch/", data=data, files=files)
+        except ApiError as error:
+            # email usata in un'organizzazione che non vediamo: anche qui un 500
+            if error.status and error.status >= 500:
+                raise ApiError(tr("OpenWISP non ha creato l'ospite ({status}): di solito "
+                                  "l'email è già usata da un altro utente").format(
+                    status=error.status), error.status) from error
+            raise
         users = batch.get("users") or []
         if len(users) != 1:
             raise ApiError(tr("Utente {username} non creato").format(username=username))

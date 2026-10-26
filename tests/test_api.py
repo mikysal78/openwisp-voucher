@@ -89,7 +89,6 @@ def test_current_user_exact_match(server):
     ]})
     api = OpenWispApi("ow.example.org", "t")
     assert api.current_user("admin")["is_superuser"] is True
-    assert server.calls[0][2]["params"] == {"search": "admin"}
 
 
 def test_radius_groups_filtered_by_org(server):
@@ -121,15 +120,45 @@ def test_create_series(server):
 
 
 def test_create_user_uses_cleartext_csv(server):
+    server.add("GET", BASE + "users/user/", 200, {"next": None, "results": [
+        {"username": "altro", "email": "p@example.org.it"}]})
     server.add("POST", BASE + "radius/batch/", 201, {"users": [{"id": "u9", "username": "pippo1"}]})
     api = OpenWispApi("ow.example.org", "t")
     cred = api.create_user("hotel", "b2", "pippo", "segreta9", "p@example.org", date(2026, 10, 28), "Pippo", "Rossi")
     # nome già preso: il server ha aggiunto un numero
     assert (cred.username, cred.password, cred.user_id) == ("pippo1", "segreta9", "u9")
-    kwargs = server.calls[0][2]
+    kwargs = server.calls[-1][2]
     assert kwargs["data"]["strategy"] == "csv"
     name, content, mime = kwargs["files"]["csvfile"]
     assert content.decode().strip() == "pippo,cleartext$segreta9,p@example.org,Pippo,Rossi"
+
+
+def test_create_user_email_already_used(server):
+    # openwisp-radius 1.3 risponderebbe con un 500: lo si evita prima
+    server.add("GET", BASE + "users/user/", 200, {"next": None, "results": [
+        {"username": "altro", "email": "P@Example.org"}]})
+    api = OpenWispApi("ow.example.org", "t")
+    with pytest.raises(ApiError) as error:
+        api.create_user("hotel", "b", "pippo", "segreta9", "p@example.org", date(2026, 10, 28))
+    assert "p@example.org" in str(error.value)
+    assert all(method == "GET" for method, _, _ in server.calls)
+
+
+def test_create_user_server_error_hints_email(server):
+    server.add("GET", BASE + "users/user/", 200, {"next": None, "results": []})
+    server.add("POST", BASE + "radius/batch/", 500)
+    api = OpenWispApi("ow.example.org", "t")
+    with pytest.raises(ApiError) as error:
+        api.create_user("hotel", "b", "pippo", "segreta9", "p@example.org", date(2026, 10, 28))
+    assert "email" in str(error.value) and error.value.status == 500
+
+
+def test_server_error_message(server):
+    server.add("POST", BASE + "radius/batch/", 500)
+    api = OpenWispApi("ow.example.org", "t")
+    with pytest.raises(ApiError) as error:
+        api.create_series("hotel", "b", "x", 1, date(2026, 10, 28))
+    assert "500" in str(error.value) and error.value.status == 500
 
 
 def test_errors_are_readable(server):

@@ -6,6 +6,9 @@
   groups (for example after creating a group in the admin) without restarting.
 - The language changes as soon as it is chosen, without restarting.
 - The sample ticket in Settings and the test print no longer show an example note.
+- Named guests: an email already used by another user is reported clearly
+  (OpenWISP answered with a generic "Internal Server Error"); other server
+  errors (5xx) get a readable message.
 
 ## 0.1.0
 
