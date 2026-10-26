@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openwisp-voucher"
+dynamic = ["version"]
+description = "Time-limited Wi-Fi accounts for the OpenWISP captive portal, printed as tickets or labels"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.10"
+authors = [{ name = "Michele Salerno" }]
+dependencies = [
+    "PySide6>=6.8,<7",
+    "requests>=2.31",
+    "segno>=1.6",
+    "keyring>=25",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+build = ["pyinstaller>=6.10", "pillow>=10"]
+
+[project.urls]
+Homepage = "https://github.com/mikysal78/openwisp-voucher"
+Issues = "https://github.com/mikysal78/openwisp-voucher/issues"
+
+[project.gui-scripts]
+openwisp-voucher = "openwisp_voucher.__main__:main"
+
+[tool.setuptools]
+packages = ["openwisp_voucher"]
+
+[tool.setuptools.dynamic]
+version = { attr = "openwisp_voucher.__version__" }
+
+[tool.setuptools.package-data]
+openwisp_voucher = ["icon.png"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
