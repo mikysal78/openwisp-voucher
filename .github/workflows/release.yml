@@ -3,6 +3,12 @@ name: Release
 # Al push di un tag v* (es. v0.2.0): test, eseguibile per Windows e per Linux
 # con PyInstaller, SHA256SUMS, attestazione di provenienza e release su GitHub
 # con le note del CHANGELOG.
+#
+# Firma dell'eseguibile Windows con SignPath (programma gratuito per i progetti
+# open source della SignPath Foundation): si attiva da sola quando nel repo
+# esistono la variabile SIGNPATH_ORGANIZATION_ID e il secret SIGNPATH_API_TOKEN
+# (Settings → Secrets and variables → Actions). Finché mancano, l'eseguibile
+# esce senza firma come prima. Vedi .signpath/README.md.
 
 on:
   push:
@@ -52,6 +58,37 @@ jobs:
       - name: Executable
         run: packaging/build.sh
 
+      # SignPath prende l'eseguibile da un artifact di questa esecuzione, lo
+      # firma (dopo l'approvazione manuale sul suo sito) e lo restituisce.
+      - name: Unsigned executable for SignPath
+        id: unsigned
+        if: runner.os == 'Windows' && vars.SIGNPATH_ORGANIZATION_ID != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-unsigned
+          path: dist/openwisp-voucher.exe
+          if-no-files-found: error
+      - name: Code signing (SignPath)
+        if: steps.unsigned.outcome == 'success'
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'openwisp-voucher' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG || 'release-signing' }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          # l'approvazione è manuale: un'ora per farla
+          wait-for-completion-timeout-in-seconds: "3600"
+          output-artifact-directory: signed
+      - name: Check the signature
+        if: steps.unsigned.outcome == 'success'
+        shell: pwsh
+        run: |
+          $sig = Get-AuthenticodeSignature signed/openwisp-voucher.exe
+          if ($sig.Status -ne 'Valid') { throw "Invalid signature: $($sig.Status) $($sig.StatusMessage)" }
+          $sig.SignerCertificate.Subject
+          Copy-Item signed/openwisp-voucher.exe dist/openwisp-voucher.exe -Force
+
       - name: Collect
         run: |
           mkdir out
@@ -88,11 +125,18 @@ jobs:
         with:
           subject-path: dist/openwisp-voucher-*
       - name: Release notes from the CHANGELOG
+        env:
+          SIGNED: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
         run: |
           awk -v v="$VERSION" '$0 == "## " v {on=1; next} /^## / {on=0} on' CHANGELOG.md > notes.md
+          if [ "$SIGNED" = "true" ]; then
+            windows_note="code-signed through SignPath.io, certificate by SignPath Foundation"
+          else
+            windows_note='not code-signed: SmartScreen may ask to confirm, "More info" → "Run anyway"'
+          fi
           cat >> notes.md <<NOTES
 
-          **Windows**: \`openwisp-voucher-$VERSION-windows.exe\` (not code-signed: SmartScreen may ask to confirm, "More info" → "Run anyway").
+          **Windows**: \`openwisp-voucher-$VERSION-windows.exe\` ($windows_note).
           **Linux** (x86_64): extract \`openwisp-voucher-$VERSION-linux-x86_64.tar.gz\` and run \`./openwisp-voucher\`; on Debian/Ubuntu Qt also needs \`libxcb-cursor0\`.
           Checksums in \`SHA256SUMS\`, build provenance attested by GitHub
           (\`gh attestation verify <file> -R $GITHUB_REPOSITORY\`).
