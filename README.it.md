@@ -66,7 +66,21 @@ Oppure, con Python 3.10+: `pipx install git+https://github.com/mikysal78/openwis
   [ansible-openwisp2](https://github.com/openwisp/ansible-openwisp2) è attivo
   di serie.
 - Per gli utenti con nome OpenWISP richiede un'**email**: si usa quella
-  dell'ospite. Le serie di voucher non ne hanno bisogno.
+  dell'ospite, e non deve essere già usata da un altro utente. Le serie di
+  voucher non ne hanno bisogno.
+- Una pagina di login del captive portal che accetti il **nome utente**, non
+  solo l'email. Con [openwisp-wifi-login-pages](https://github.com/openwisp/openwisp-wifi-login-pages),
+  nella configurazione dell'organizzazione:
+
+  ```yaml
+  login_form:
+    input_fields:
+      username:
+        type: "text"
+        pattern: '[a-zA-Z@.+\-_\d]{1,150}'
+  ```
+
+  Con `type: "email"` il browser rifiuta nomi come `ospite1`.
 
 ### Utenti operatori
 

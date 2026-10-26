@@ -63,7 +63,20 @@ Or, with Python 3.10+: `pipx install git+https://github.com/mikysal78/openwisp-v
   beat), which disables expired accounts every night. It is enabled by default
   in [ansible-openwisp2](https://github.com/openwisp/ansible-openwisp2).
 - OpenWISP requires an **email** for named users: use the guest's address.
-  The voucher series do not need it.
+  It must not be used by another user. The voucher series do not need it.
+- A captive portal login page that accepts a **username**, not only an email.
+  With [openwisp-wifi-login-pages](https://github.com/openwisp/openwisp-wifi-login-pages),
+  in the organization's configuration:
+
+  ```yaml
+  login_form:
+    input_fields:
+      username:
+        type: "text"
+        pattern: '[a-zA-Z@.+\-_\d]{1,150}'
+  ```
+
+  With `type: "email"` the browser rejects names like `guest1`.
 
 ### Operator accounts
 
