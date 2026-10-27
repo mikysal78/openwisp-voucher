@@ -135,10 +135,12 @@ PATH=$PWD/.venv/bin:$PATH packaging/build.sh   # eseguibile unico in dist/
 
 ## Code signing policy
 
-Firma del codice gratuita offerta da [SignPath.io](https://about.signpath.io/),
-certificato della [SignPath Foundation](https://signpath.org/). La domanda al
-programma della SignPath Foundation è stata inviata: finché non viene
-approvata, gli eseguibili per Windows non sono firmati.
+Gli eseguibili per Windows per ora non sono firmati. La domanda al programma
+gratuito della [SignPath Foundation](https://signpath.org/) (ottobre 2026) non
+è stata accolta perché il progetto è ancora giovane e poco conosciuto; verrà
+ripresentata più avanti. Il workflow delle release è già pronto per
+[SignPath.io](https://about.signpath.io/) e le regole che seguono valgono non
+appena la firma viene attivata.
 
 - Autori e revisori: [Michele Salerno](https://github.com/mikysal78)
 - Approvazione delle firme: [Michele Salerno](https://github.com/mikysal78)

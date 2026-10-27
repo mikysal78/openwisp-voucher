@@ -44,7 +44,8 @@ publishes the signed file. The release notes then say it is signed.
 
 The SignPath Foundation asks the project to publish its code signing policy:
 it is the "Code signing policy" section of `README.md` and `README.it.md`.
-After the approval, remove the sentence saying that the application is pending.
+After the approval, update the "Code signing policy" section of the READMEs
+(it currently says that the first application was not accepted).
 For reference, the required content:
 
 ```markdown

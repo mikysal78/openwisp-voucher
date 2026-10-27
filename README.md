@@ -130,10 +130,12 @@ PATH=$PWD/.venv/bin:$PATH packaging/build.sh   # single executable in dist/
 
 ## Code signing policy
 
-Free code signing provided by [SignPath.io](https://about.signpath.io/),
-certificate by [SignPath Foundation](https://signpath.org/). The application
-to the SignPath Foundation program has been submitted: until it is approved,
-the Windows executables are not signed.
+The Windows executables are not code-signed yet. The application to the free
+[SignPath Foundation](https://signpath.org/) program (October 2026) was not
+accepted because the project is still young and not widely known; it will be
+submitted again later. The release workflow is already prepared for
+[SignPath.io](https://about.signpath.io/) and the rules below apply as soon as
+signing is enabled.
 
 - Committers and reviewers: [Michele Salerno](https://github.com/mikysal78)
 - Approvers: [Michele Salerno](https://github.com/mikysal78)
